@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const tempMovieData = [
   {
@@ -51,21 +51,71 @@ const tempWatchedData = [
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+const  KEY="a477e116";
 
 
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  // const [isLoading,setLoading]=useState(false);
+  // const[error,setError]=useState("");
+  const query="interstellar";
+
+
+  // // sync queries with data\\
+  useEffect(function(){
+    console.log("after initial render until unmount");
+  },[]);
+  useEffect(function(){
+    console.log("after every render");
+  });
+  useEffect(function(){
+    console.log("popcorn");
+  },[query]);
+  console.log("during render");
+
+useEffect(
+function(){
+fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
+.then((res)=>res.json())
+.then((data)=>setMovies(data.Search));
+}
+,[]);
+// //  async await use kora hoise jate prom 
+// useEffect (function(){
+//   async function fetchMovies(){
+//     //  try {setLoading(true);
+//     const res= await fetch(`http://www.omdbapi.com/?apikey=${KEY}& s=interstellar`);
+  
+//     // if(!res.ok)
+//       // throw new Error("movie data is not found");
+//     // ei msg ta screen e display korate state nite hobe ja state change korbe condition fullfill na korle
+
+//     const data=await res.json();
+
+//     // if (data.response==='false')
+//     //   throw new Error("buffer not loading");
+//     setMovies(data.Search);
+//     setLoading(false);
+
+//     // console.log(data.Search);
+
+//      }
+
+//   fetchMovies();
+
+// },[]);
 
 
   return (
     <>
     <Navbar>
-    <Search/>
+        <Search
+        //  query={query} setQuery={setQuery}
+         />
         <Logo/>
         <NumResults movies={movies}/>
     </Navbar>
-
     <Main> 
 {/* {/* using element={} explicitly rather than  children
 <Box element={<MovieList movies={movies}/>}/>
@@ -80,8 +130,13 @@ element={
 
  {/* */}
 
-        <Box>
-           <MovieList movies={movies}/>
+      <Box>
+          <MovieList movies={movies}/>
+           {/* {isLoading && <Loading/>} 
+           {!isLoading && !error && <MovieList movies={movies}/>}
+         
+           {error && <ErrorMessage message={error}/>} */}
+        
       </Box>
       <Box>
         <>
@@ -101,6 +156,21 @@ function Navbar({children}){
       </nav>
   );
 }
+// effect hook part er jonne
+function Loading(){
+return(
+  <p className="loader">Loading...</p>
+);
+}
+function ErrorMessage({message}){
+  return(
+    <p className="error">
+      <span>⛔</span>
+      {message}
+    </p> 
+  )
+}
+// \\
 
 function Logo(){
   return(
@@ -111,8 +181,12 @@ function Logo(){
   );
 }
 
-function Search(){
+function Search()
+  // {query,setQuery})
+
+{
   const [query, setQuery] = useState("");
+
     return(
   <input
           className="search"
@@ -173,18 +247,19 @@ function Box({children}){
 //   );
 // }
 
-// movilist eita listbox er children tai opne and close listbx e parent compo te jeye prop hisebe pass korai disi eita
+// movielist eita listbox er children tai opne and close listbx e parent compo te jeye prop hisebe pass korai disi eita
 function MovieList({movies}){
-
   return(
     <ul className="list">
     {movies?.map((movie) => (
      <Movie movie={movie}
-     key={movie.imdbID}/>
+     key={movie.imdbID}
+     />
     ))}
   </ul>
   );
 }
+
 // \\
 function Movie({movie}){
   return(
@@ -229,6 +304,7 @@ function WatchedSummary({watched}){
           </div>
   );
 }
+
 function WatchedMovieList({watched}){
   return(
     <ul className="list">
@@ -239,6 +315,7 @@ function WatchedMovieList({watched}){
   </ul>
   );
 }
+
 function WatchedMovie({movie}){
   return(
     <li key={movie.imdbID}>
